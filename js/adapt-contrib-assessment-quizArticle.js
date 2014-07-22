@@ -3,10 +3,73 @@ define(function(require) {
     var Adapt = require('coreJS/adapt');
 
     var AssessmentView = Backbone.View.extend({
+
+        className: "extension-assessment display-none",
+
+        events: {
+            'click a.button.review': 'onReviewClicked',
+            'click a.button.retake': 'onRetakeClicked'
+        },
+
         initialize: function() {
             this.listenTo(this.model, 'change:_isComplete', this.assessmentComplete);
             this.listenTo(Adapt, 'remove', this.removeAssessment);
+            this.listenTo(Adapt, 'assessment:complete', function() {
+                this.listenTo(Adapt, 'tutor:closed', this.onTutorClosed);
+            });
             this.setUpQuiz();
+            this.render();
+        },
+
+        render: function() {
+            var template = Handlebars.templates["reviewRetake"];
+            this.$el.html(template()).appendTo('body');
+            return this;
+        },
+
+        onTutorClosed: function() {
+            this.$el.removeClass('display-none');
+        },
+
+        onReviewClicked: function(event) {
+            event.preventDefault();
+            this.$el.addClass('display-none');
+            $.scrollTo(0, 0);
+        },
+
+        onRetakeClicked: function(event) {
+            event.preventDefault();
+            this.$el.addClass('display-none');
+            $.scrollTo(0, 0);
+            this.resetModel();
+
+            var index = document.location.href.indexOf('#/id/');
+            var route = document.location.href.slice(index, document.location.href.length);
+            Backbone.history.navigate(route, {trigger: true});
+        },
+
+        resetModel: function() {
+            _.each(this.getQuestionComponents(), function(component) {
+                component.set('_attemptsLeft', component.get('_attempts'));
+                component.set('_isComplete', false);
+                component.set('_isEnabled', true);
+                component.set('_isSubmitted', false);
+                component.set('_selectedItems', []);
+                component.set('_userAnswer', []);
+
+                component.unset('_isAtLeastOneCorrectSelection');
+                component.unset('_isCorrect');
+                component.unset('_numberOfCorrectAnswers');
+                component.unset('_score');
+                component.unset('feedbackMessage');
+            });
+
+            this.model.unset('feedbackMessage');
+            this.model.unset('feedbackTitle');
+            this.model.unset('score');
+
+            this.model.setOnChildren('_isComplete', false);
+            this.model.set('_isComplete', false);
         },
 
         getQuestionComponents: function() {

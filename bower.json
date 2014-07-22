@@ -3,7 +3,8 @@
   "version": "0.0.2",
   "homepage": "https://github.com/adaptlearning/adapt-contrib-assessment",
   "authors": [
-    "Brian Quinn <brian@learningpool.com>"
+    "Brian Quinn <brian@learningpool.com>",
+    "Himanshu Rajotia <himanshu.rajotia@credipoint.com>"
   ],
   "displayName" : "Assessment",
   "extension" : "assessment",
